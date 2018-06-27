@@ -1,5 +1,7 @@
 //Created by Christopher Wolff
 
+package pong;
+
 public class Ball {
 	//private members cannot be accesed from other classes
 	private int directionVector = 2;

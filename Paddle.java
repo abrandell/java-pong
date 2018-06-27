@@ -1,4 +1,7 @@
 //Created by Christopher Wolff
+
+package pong;
+
 public class Paddle {
 
 	private int xPos, yPos;
