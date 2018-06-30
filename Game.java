@@ -2,15 +2,17 @@
 
 package pong;
 
+import utils.CommandLine; //because the CommandLine is not in the build path, import here
+
 import javax.swing.*; //window
 import java.awt.*; //painting graphics and images
 import java.util.Random; //random number generator
 import java.awt.image.BufferedImage; // for double buffering
 import java.awt.event.KeyEvent; //includes all of the constants used for input
 import java.io.File; //for loading .wav files. Dependant on the current working directory. ie. what happens when pwd is typed in a shell.
-import javax.sound.sampled.AudioSystem; //for playing sounds
-import javax.sound.sampled.Clip; //for playing sounds
-import javax.sound.sampled.LineUnavailableException; //audio exception
+//import javafx.scene.media.Media; not included with open JDK
+//import javafx.scene.media.MediaPlayer; not included with open JDK
+
 
 //imports below used to test exceptions on ubuntu
 import javax.sound.sampled.AudioInputStream;
@@ -67,8 +69,27 @@ public class Game extends JFrame implements Runnable {
 
 		//start the game
 		startGameThread();
+
+		//start the command line runner
+		commandThread();
+
+		//check the current thread
+		System.out.println(Thread.currentThread());
+
 		
 	} //end constructor, game init.
+
+	public void commandThread(){
+		Thread command_thread = new Thread(new CommandLine(), "Command Thread");
+		try{
+	        //waits for this current thread to die before beginning execution		
+			command_thread.join();
+		//most exceptions are contained in java.lang
+		}catch(InterruptedException ex){
+			ex.printStackTrace();
+		}
+		command_thread.start();
+	}
 
 	public void initSound(){
 		//set up sound files (. can be used to specify the relative path)
@@ -102,13 +123,15 @@ public class Game extends JFrame implements Runnable {
 	/*Starts the Thread which runs the game loop and various processing/updates*/
 	public void startGameThread(){
 		//set the game start running
-		Thread gameThread = new Thread(this);
+		Thread gameThread = new Thread(this, "Game Thread");
 		try{
 	        //waits for this current thread to die before beginning execution		
 			gameThread.join();
 		//most exceptions are contained in java.lang
 		}catch(InterruptedException ex){
-			ex.printStackTrace();
+			System.out.println("Interrupted Exception");
+		}catch(NullPointerException ex){
+			System.out.println("NullPointerException handled.");
 		}
 		//actually run the game
 		gameThread.start();
@@ -118,17 +141,13 @@ public class Game extends JFrame implements Runnable {
 	//for playing sound files
 	public void playSound(String sound){
 		try {
-			AudioInputStream inputStream = AudioSystem.getAudioInputStream(this.getClass().getResource(sound));
-           		AudioFormat format = inputStream.getFormat();
-            		DataLine.Info info = new DataLine.Info(Clip.class, format);
-			Clip clip = (Clip)AudioSystem.getLine(info);
-            		clip.open(inputStream);
-            		clip.start();
+		   /*Not included with open JDK
+		  Media hit = new Media(new File(bip).toURI().toString());
+		   MediaPlayer player = new MediaPlayer(hit);
+	           mediaPlayer.play();*/
 		//if the audio clips compete for resources
-		}catch(LineUnavailableException ex){
-			System.out.println("handled strange audio exception");
 		}catch(Exception ex){
-			System.out.println("general clip problem");
+			System.out.println("general audio problem");
 			ex.printStackTrace();
 		}
 	}
